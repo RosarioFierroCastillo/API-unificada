@@ -39,7 +39,7 @@ namespace API_Archivo.Controllers
                     //    {
                     while (reader.Read())
                     {
-                        list_sesion.Add(new Sesion() { correo = reader.GetString(1), id_usuario = reader.GetInt32(0), tipo_usuario = reader.GetString(13) });
+                        list_sesion.Add(new Sesion() { correo = reader.GetString(1), id_usuario = reader.GetInt32(0), tipo_usuario = reader.GetString(13), id_fraccionamiento= reader.IsDBNull(6) ? 0 : reader.GetInt32(6) });
                         // AddDevice.Login("admin", "Repara123", "5551", "187.216.118.73");
                     }
 
