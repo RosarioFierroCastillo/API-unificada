@@ -130,7 +130,7 @@ namespace API_Archivo.Clases
 
                     while (reader.Read())
                     {
-                        Lista_Personas.Add(new Personas() { id_persona = reader.GetInt32(0), nombre = reader.GetString(1), apellido_pat = reader.GetString(2), apellido_mat = reader.GetString(3), telefono = reader.GetString(4), tipo_usuario = reader.GetString(6), id_fraccionamiento = reader.GetInt32(7), id_lote = reader.GetInt32(8), intercomunicador = reader.GetInt32(9), codigo_acceso = reader.GetString(10), correo = reader.GetString(11) });
+                        Lista_Personas.Add(new Personas() { id_persona = reader.GetInt32(0), nombre = reader.GetString(1) });
                         // MessageBox.Show();
                     }
 
