@@ -17,7 +17,7 @@ namespace API_Archivo.Clases
 
         public string? codigo_acceso {get; set;}
 
-        public DateTime fecha_nacimiento { get; set; }
+        public DateTime? fecha_nacimiento { get; set; }
 
         public string? correo { get; set; }
         public string? contrasenia { get; set; }

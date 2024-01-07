@@ -55,6 +55,10 @@ namespace API_Archivo.Controllers
                 {
                     conexion.Close();
                 }
+
+                //Deudas obj_deudas = new Deudas();
+
+                //obj_deudas.AsignarDeudasAUltimaPersona(list_sesion[0].id_fraccionamiento);
                 return list_sesion;
             }
 

@@ -45,7 +45,7 @@ namespace API_Archivo.Controllers
                         Deuda.Add(new Deudoress()
                         {
                             id_deuda = reader.IsDBNull(0) ? 0 : reader.GetInt32(0), // Si es nulo, se asigna un valor predeterminado (en este caso, 0)
-                            concepto = reader.IsDBNull(7) ? string.Empty : reader.GetString(7), // Si es nulo, se asigna una cadena vacía
+                            //concepto = reader.IsDBNull(7) ? string.Empty : reader.GetString(7), // Si es nulo, se asigna una cadena vacía
                             persona = reader.IsDBNull(4) ? string.Empty : reader.GetString(4),
                             monto = reader.IsDBNull(5) ? 0.0f : reader.GetFloat(5), // Si es nulo, se asigna un valor flotante predeterminado (en este caso, 0.0)
                             proximo_pago = reader.IsDBNull(8) ? DateTime.MinValue : reader.GetDateTime(8)
