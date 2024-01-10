@@ -142,10 +142,10 @@ namespace API_Archivo.Controllers
 
         [HttpPost]
         [Route("Generar_Invitacion")]
-        public string Generar_invitacion(string token, string correo_electronico, int id_fraccionamiento,int id_lote, string nombre_fraccionamiento,string nombre_admin)
+        public string Generar_invitacion(string token, string correo_electronico, int id_fraccionamiento,int id_lote, string nombre_fraccionamiento,string nombre_admin,string tipo_usuario)
         {
             Invitaciones obj_invitacion = new Invitaciones();
-            if (obj_invitacion.Generar_invitacion(token, correo_electronico, id_fraccionamiento,id_lote, nombre_fraccionamiento,nombre_admin))
+            if (obj_invitacion.Generar_invitacion(token, correo_electronico, id_fraccionamiento,id_lote, nombre_fraccionamiento,nombre_admin,tipo_usuario))
             {
                 return "Invitacion generada correctamente";
             }
