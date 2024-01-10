@@ -191,6 +191,47 @@ namespace API_Archivo.Clases
             }
         }
 
+        public List<Personas> Consultar_ArrendatariosYPropietarios(int id_fraccionamiento)
+        {
+            List<Personas> Lista_Personas = new List<Personas>();
+
+            using (MySqlConnection conexion = new MySqlConnection(Global.cadena_conexion))
+            {
+
+                MySqlCommand comando = new MySqlCommand("SELECT * FROM personas WHERE (id_fraccionamiento=@id_fraccionamiento) && (tipo_usuario='arrendatario' OR tipo_usuario='propietario')", conexion);
+
+                comando.Parameters.Add("@id_fraccionamiento", MySqlDbType.Int32).Value = id_fraccionamiento;
+
+
+
+                try
+                {
+
+                    conexion.Open();
+
+                    MySqlDataReader reader = comando.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        Lista_Personas.Add(new Personas() { id_persona = reader.GetInt32(0), nombre = reader.GetString(1) });
+                        // MessageBox.Show();
+                    }
+
+
+                }
+                catch (MySqlException ex)
+                {
+
+                }
+                finally
+                {
+                    conexion.Close();
+                }
+
+                return Lista_Personas;
+            }
+        }
+
     }
 
 }

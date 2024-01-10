@@ -68,7 +68,7 @@ namespace API_Archivo.Controllers
                 Deudas obj_deudas = new Deudas();
                 if (fraccionamiento_agregado)
                 {
-                    if (obj_deudas.AsignarDeudaNuevaATodos(request.id_fraccionamiento))
+                    if (obj_deudas.AsignarDeudaNuevaATodos(request.id_fraccionamiento,request.destinatario))
                     {
                         fraccionamiento_agregado = true;
                     }
@@ -294,7 +294,7 @@ namespace API_Archivo.Controllers
                 Deudas obj_deudas = new Deudas();
                 if (fraccionamiento_agregado)
                 {
-                    if (obj_deudas.AsignarDeudaNuevaATodos(request.id_fraccionamiento))
+                    if (obj_deudas.AsignarDeudaNuevaATodos(request.id_fraccionamiento,request.destinatario))
                     {
                         fraccionamiento_agregado = true;
                     }
@@ -366,7 +366,7 @@ namespace API_Archivo.Controllers
         [HttpGet]
         [Route("Consultar_DeudorOrdinario")]
 
-        public List<Deudoress> Consultar_DeudoresOrdinarios(int id_fraccionamiento, int id_usuario)
+        public List<Deudoress> Consultar_DeudorOrdinario(int id_fraccionamiento, int id_usuario)
         {
             List<Deudoress> Deuda = new List<Deudoress>();
 
@@ -389,15 +389,144 @@ namespace API_Archivo.Controllers
                             id_deudor = reader.GetInt32(1),
                             id_deuda = reader.GetInt32(2),
                             id_fraccionamiento = reader.GetInt32(3),
-                            lote= !reader.IsDBNull(4) ? reader.GetInt32(4) : 0,
-                            tipo_deuda = reader.GetString(5),
-                            nombre_deuda = reader.GetString(6),
-                            monto = reader.GetFloat(7),
-                            recargo= reader.GetFloat(8),
-                            dias_gracia=reader.GetInt32(9),
-                            proximo_pago = reader.GetDateTime(10),
-                            estado = reader.GetString(11),
-                            periodicidad = reader.GetInt32(12)
+                            nombre_persona = !reader.IsDBNull(4) ? reader.GetString(4) : "",
+                            lote = !reader.IsDBNull(5) ? reader.GetInt32(5) : 0,
+                            tipo_deuda = reader.GetString(6),
+                            nombre_deuda = reader.GetString(7),
+                            monto = reader.GetFloat(8),
+                            recargo= reader.GetFloat(9),
+                            dias_gracia=reader.GetInt32(10),
+                            proximo_pago = reader.GetDateTime(11),
+                            estado = reader.GetString(12),
+                            periodicidad = reader.GetInt32(13)
+                        };
+                        DateTime fechaLimitePago = deuda.proximo_pago.AddDays(deuda.periodicidad);
+
+                        // Agregar impresiones para depurar
+                        Console.WriteLine($"Fecha límite para el pago: {fechaLimitePago}, Fecha actual: {DateTime.Today}");
+
+                        // Verificar si la deuda está vencida utilizando DateTime.Compare
+                        if (DateTime.Compare(fechaLimitePago, DateTime.Today) < 0)
+                        {
+                            Deuda.Add(deuda);
+                        }
+                    }
+                }
+                catch (MySqlException ex)
+                {
+                    // Manejar la excepción
+                }
+                finally
+                {
+                    conexion.Close();
+                }
+
+                return Deuda;
+            }
+        }
+
+        //este es el bueno
+        [HttpGet]
+        [Route("Consultar_DeudoresOrdinarios")]
+
+        public List<Deudoress> Consultar_DeudoresOrdinarios(int id_fraccionamiento)
+        {
+            List<Deudoress> Deuda = new List<Deudoress>();
+
+            using (MySqlConnection conexion = new MySqlConnection(Global.cadena_conexion))
+            {
+                MySqlCommand comando = new MySqlCommand("SELECT * FROM deudores WHERE (id_fraccionamiento=@id_fraccionamiento && periodicidad>0)", conexion);
+
+                comando.Parameters.Add("@id_fraccionamiento", MySqlDbType.Int32).Value = id_fraccionamiento;
+                
+
+                try
+                {
+                    conexion.Open();
+                    MySqlDataReader reader = comando.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        Deudoress deuda = new Deudoress()
+                        {
+                            id_deudor = reader.GetInt32(1),
+                            id_deuda = reader.GetInt32(2),
+                            id_fraccionamiento = reader.GetInt32(3),
+                            nombre_persona = !reader.IsDBNull(4) ? reader.GetString(4) : "",
+                            lote = !reader.IsDBNull(5) ? reader.GetInt32(5) : 0,
+                            tipo_deuda = reader.GetString(6),
+                            nombre_deuda = reader.GetString(7),
+                            monto = reader.GetFloat(8),
+                            recargo = reader.GetFloat(9),
+                            dias_gracia = reader.GetInt32(10),
+                            proximo_pago = reader.GetDateTime(11),
+                            estado = reader.GetString(12),
+                            periodicidad = reader.GetInt32(13)
+                        };
+                        DateTime fechaLimitePago = deuda.proximo_pago.AddDays(deuda.periodicidad);
+
+                        // Agregar impresiones para depurar
+                        Console.WriteLine($"Fecha límite para el pago: {fechaLimitePago}, Fecha actual: {DateTime.Today}");
+
+                        // Verificar si la deuda está vencida utilizando DateTime.Compare
+                        if (DateTime.Compare(fechaLimitePago, DateTime.Today) < 0)
+                        {
+                            Deuda.Add(deuda);
+                        }
+                    }
+                }
+                catch (MySqlException ex)
+                {
+                    // Manejar la excepción
+                }
+                finally
+                {
+                    conexion.Close();
+                }
+
+                return Deuda;
+            }
+        }
+
+        //este es el bueno
+        [HttpGet]
+        [Route("Consultar_DeudoresUsuario")]
+
+        public List<Deudoress> Consultar_DeudoresUsuario(int id_lote)
+        {
+            List<Deudoress> Deuda = new List<Deudoress>();
+
+            Console.WriteLine(id_lote);
+
+            using (MySqlConnection conexion = new MySqlConnection(Global.cadena_conexion))
+            {
+                MySqlCommand comando = new MySqlCommand("SELECT * FROM deudores WHERE (lote=@lote)", conexion);
+
+                comando.Parameters.Add("@lote", MySqlDbType.Int32).Value = id_lote;
+
+
+                try
+                {
+                    conexion.Open();
+                    MySqlDataReader reader = comando.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        Deudoress deuda = new Deudoress()
+                        {
+                            id_deudor = reader.GetInt32(1),
+                            id_deuda = reader.GetInt32(2),
+                            id_fraccionamiento = reader.GetInt32(3),
+                            nombre_persona = !reader.IsDBNull(4) ? reader.GetString(4) : "",
+                            lote = !reader.IsDBNull(5) ? reader.GetInt32(5) : 0,
+                            tipo_deuda = reader.GetString(6),
+                            nombre_deuda = reader.GetString(7),
+                            monto = reader.GetFloat(8),
+                            recargo = reader.GetFloat(9),
+                            dias_gracia = reader.GetInt32(10),
+                            proximo_pago = reader.GetDateTime(11),
+                            estado = reader.GetString(12),
+                            periodicidad = reader.GetInt32(13)
                         };
                         DateTime fechaLimitePago = deuda.proximo_pago.AddDays(deuda.periodicidad);
 
@@ -499,15 +628,16 @@ namespace API_Archivo.Controllers
                             id_deudor = reader.GetInt32(1),
                             id_deuda = reader.GetInt32(2),
                             id_fraccionamiento = reader.GetInt32(3),
-                            lote = !reader.IsDBNull(4) ? reader.GetInt32(4) : 0,
-                            tipo_deuda = reader.GetString(5),
-                            nombre_deuda = reader.GetString(6),
-                            monto = reader.GetFloat(7),
-                            recargo = reader.GetFloat(8),
-                            dias_gracia = reader.GetInt32(9),
-                            proximo_pago = reader.GetDateTime(10),
-                            estado = reader.GetString(11),
-                            periodicidad = reader.GetInt32(12)
+                            nombre_persona = !reader.IsDBNull(4) ? reader.GetString(4) : "",
+                            lote = !reader.IsDBNull(5) ? reader.GetInt32(5) : 0,
+                            tipo_deuda = reader.GetString(6),
+                            nombre_deuda = reader.GetString(7),
+                            monto = reader.GetFloat(8),
+                            recargo = reader.GetFloat(9),
+                            dias_gracia = reader.GetInt32(10),
+                            proximo_pago = reader.GetDateTime(11),
+                            estado = reader.GetString(12),
+                            periodicidad = reader.GetInt32(13)
 
                             
                     };

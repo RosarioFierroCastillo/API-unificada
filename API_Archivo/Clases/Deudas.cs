@@ -6,6 +6,7 @@ namespace API_Archivo.Clases
     public class Deudas
 
     {
+        public string destinatario { get; set; }
         public int id_deudas { get; set; } //primary key
 
         public int id_fraccionamiento { get; set; }
@@ -132,16 +133,16 @@ namespace API_Archivo.Clases
 
         }
 
-        public bool AsignarDeudaNuevaATodos(int id_fraccionamiento)
+        public bool AsignarDeudaNuevaATodos(int id_fraccionamiento,string destinatario)
         {
             List<Deudas> Deuda = new List<Deudas>();
 
             using (MySqlConnection conexion = new MySqlConnection(Global.cadena_conexion))
             {
 
-                MySqlCommand comando = new MySqlCommand("select * from deudas order by id_deudas desc limit 1", conexion);
+                MySqlCommand comando = new MySqlCommand("select * from deudas where id_fraccionamiento=@id_fraccionamiento order by id_deudas desc limit 1", conexion);
 
-                comando.Parameters.Add("@id_tesorero", MySqlDbType.Int32).Value = id_tesorero;
+                comando.Parameters.Add("@id_fraccionamiento", MySqlDbType.Int32).Value = id_fraccionamiento;
 
 
                 try
@@ -183,15 +184,37 @@ namespace API_Archivo.Clases
             }
 
             List<Personas> Persona = new List<Personas>();
-
+            bool isindividual = false;
             using (MySqlConnection conexion = new MySqlConnection(Global.cadena_conexion))
             {
+                string query = "";
 
-                MySqlCommand comando = new MySqlCommand("SELECT * FROM personas where id_administrador=@id_administrador", conexion);
+                if (destinatario == "arrendatario")
+                {
+                    query = "SELECT * FROM personas where id_administrador=@id_administrador && tipo_usuario='arrendatario'";
+                }else if (destinatario == "propietario")
+                {
+                    query = "SELECT * FROM personas where id_administrador=@id_administrador && tipo_usuario='propietario'";
+                }else if (destinatario == "todos")
+                {
+                    query = "SELECT * FROM personas where (id_administrador=@id_administrador) && (tipo_usuario='arrendatario' OR tipo_usuario='propietario')";
+                }
+                else
+                {
+                    isindividual = true;
+                    query = "SELECT * FROM personas where id_administrador=@id_administrador && id_persona=@id_persona";
+                }
+
+                MySqlCommand comando = new MySqlCommand(query, conexion);
                 //y id_fraccionamiento
                 //  comando.Parameters.Add("@Nombre", MySqlDbType.Int32).Value = nombre;
                 //  comando.Parameters.Add("@Apellido_pat", MySqlDbType.Int32).Value = apellido_pat;
                 comando.Parameters.Add("@id_administrador", MySqlDbType.Int32).Value = id_fraccionamiento;
+                if (isindividual)
+                {
+                    comando.Parameters.Add("@id_persona", MySqlDbType.Int32).Value = Convert.ToInt32(destinatario);
+                }
+                
 
 
                 try
@@ -248,11 +271,12 @@ namespace API_Archivo.Clases
                 foreach (Personas persona in Persona)
                 {
                     MySqlCommand insertDeudor = new MySqlCommand(
-                        "INSERT INTO deudores (id_deudor,id_deuda, id_fraccionamiento, lote, tipo_deuda, nombre_deuda, monto,recargo,dias_gracia, proximo_pago, estado,periodicidad) " +
-                        "VALUES (@id_deudor,@id_deuda, @id_fraccionamiento, @lote, @tipo_deuda, @nombre_deuda, @monto,@recargo,@dias_gracia, @proximo_pago, @estado,@periodicidad)", conexion);
+                        "INSERT INTO deudores (id_deudor,id_deuda, id_fraccionamiento,nombre_persona, lote, tipo_deuda, nombre_deuda, monto,recargo,dias_gracia, proximo_pago, estado,periodicidad) " +
+                        "VALUES (@id_deudor,@id_deuda, @id_fraccionamiento,@nombre_persona, @lote, @tipo_deuda, @nombre_deuda, @monto,@recargo,@dias_gracia, @proximo_pago, @estado,@periodicidad)", conexion);
 
                     insertDeudor.Parameters.AddWithValue("@id_deudor", persona.id_persona); 
                     insertDeudor.Parameters.AddWithValue("@id_fraccionamiento", persona.id_fraccionamiento);
+                    insertDeudor.Parameters.AddWithValue("@nombre_persona", persona.nombre + " " + persona.apellido_pat + " " + persona.apellido_mat);
                     insertDeudor.Parameters.AddWithValue("@lote", persona.id_lote);
                     if (Deuda[0].periodicidad >0)
                     {

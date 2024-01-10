@@ -5,6 +5,7 @@
         public int id_deuda { get; set; }
         public int id_deudor { get; set; }
         public int id_fraccionamiento { get; set; }
+        public string nombre_persona { get; set; }
         public int lote { get; set; }
         public string tipo_deuda { get; set; }
         public string nombre_deuda { get; set; }

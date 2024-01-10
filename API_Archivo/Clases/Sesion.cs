@@ -12,6 +12,7 @@ namespace API_Archivo.Clases
         public string tipo_usuario { get; set; }
 
         public int id_fraccionamiento { get; set; }
+        public int id_lote { get; set; }
 
 
     }
